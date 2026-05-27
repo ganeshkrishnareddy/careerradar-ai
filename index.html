@@ -24,6 +24,8 @@
 
     * { box-sizing: border-box; }
 
+    [hidden] { display: none !important; }
+
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -502,6 +504,34 @@
       background: linear-gradient(90deg, var(--teal), var(--blue));
     }
 
+    .upload-card {
+      border: 1px dashed #94a3b8;
+      border-radius: 8px;
+      background: #f8fafc;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .upload-card strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .upload-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .analysis-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+      color: #334155;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
     @media (max-width: 1100px) {
       .app { grid-template-columns: 220px minmax(0, 1fr); }
       aside { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
@@ -575,8 +605,8 @@
           <p class="subtle">AI-ranked internships, hackathons, jobs, and learning opportunities based on your profile.</p>
         </div>
         <div class="actions">
-          <button class="btn">Import resume</button>
-          <button class="btn primary">Refresh radar</button>
+          <button class="btn" type="button" id="import-resume-button">Import resume</button>
+          <button class="btn primary" type="button" id="refresh-radar-button">Refresh radar</button>
         </div>
       </div>
 
@@ -624,12 +654,12 @@
           <button class="btn primary">Rewrite bullet</button>
         </div>
         <div class="grid-two">
-          <div class="mini-card">
+          <div class="mini-card" id="resume-strength-card">
             <h3>Strong signals</h3>
             <p>React, Node.js, MongoDB, OpenAI APIs, AI automation, and student-product experience are clear matches.</p>
             <div class="fit-meter"><span style="width:86%"></span></div>
           </div>
-          <div class="mini-card">
+          <div class="mini-card" id="resume-gap-card">
             <h3>Missing proof</h3>
             <p>Add metrics: users helped, time saved, recommendations generated, or outreach messages produced.</p>
             <div class="fit-meter"><span style="width:58%"></span></div>
@@ -712,7 +742,12 @@
           </div>
           <label for="resume">Resume summary</label>
           <textarea id="resume">Built full-stack apps with React, Node.js, MongoDB, and AI automation. Interested in internships, hackathons, and student-focused AI products.</textarea>
-          <button type="button" class="btn primary" style="width:100%; margin-top:14px;">Generate fit radar</button>
+          <input id="resume-file" type="file" accept=".pdf,.docx,.txt,.md,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+          <div class="upload-card" id="resume-upload-status">
+            <strong>Resume upload</strong>
+            <span>Upload PDF, DOCX, TXT, or MD. CareerRadar will extract skills, score fit, and suggest gaps.</span>
+          </div>
+          <button type="button" class="btn primary" id="generate-fit-button" style="width:100%; margin-top:14px;">Generate fit radar</button>
         </form>
 
         <section class="opportunities" aria-label="Opportunity recommendations">
@@ -859,6 +894,137 @@
         views.forEach(view => view.classList.toggle("active", view.id === `view-${target}`));
       });
     });
+
+    const importResumeButton = document.getElementById("import-resume-button");
+    const refreshRadarButton = document.getElementById("refresh-radar-button");
+    const generateFitButton = document.getElementById("generate-fit-button");
+    const resumeFileInput = document.getElementById("resume-file");
+    const resumeTextarea = document.getElementById("resume");
+    const skillsInput = document.getElementById("skills");
+    const uploadStatus = document.getElementById("resume-upload-status");
+    const resumeStrengthCard = document.getElementById("resume-strength-card");
+    const resumeGapCard = document.getElementById("resume-gap-card");
+
+    const skillSignals = [
+      "React", "Node.js", "MongoDB", "OpenAI APIs", "JavaScript", "TypeScript",
+      "Python", "Express", "API", "AI automation", "resume", "hackathon",
+      "full-stack", "frontend", "backend", "deployment", "GitHub", "Figma",
+      "analytics", "interview", "outreach", "recommendation"
+    ];
+
+    const opportunityRequirements = ["React", "Node.js", "MongoDB", "OpenAI APIs", "full-stack", "AI automation", "deployment", "analytics", "recommendation"];
+
+    function setUploadStatus(title, message) {
+      uploadStatus.innerHTML = `<strong>${title}</strong><span>${message}</span>`;
+    }
+
+    function loadScriptOnce(src, globalName) {
+      return new Promise((resolve, reject) => {
+        if (globalName && window[globalName]) {
+          resolve(window[globalName]);
+          return;
+        }
+        const existing = document.querySelector(`script[src="${src}"]`);
+        if (existing) {
+          existing.addEventListener("load", () => resolve(globalName ? window[globalName] : true), { once: true });
+          existing.addEventListener("error", reject, { once: true });
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = src;
+        script.async = true;
+        script.addEventListener("load", () => resolve(globalName ? window[globalName] : true));
+        script.addEventListener("error", reject);
+        document.body.appendChild(script);
+      });
+    }
+
+    async function extractPdfText(file) {
+      await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", "pdfjsLib");
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      const data = await file.arrayBuffer();
+      const pdf = await window.pdfjsLib.getDocument({ data }).promise;
+      const pages = [];
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const content = await page.getTextContent();
+        pages.push(content.items.map(item => item.str).join(" "));
+      }
+      return pages.join("\n");
+    }
+
+    async function extractDocxText(file) {
+      await loadScriptOnce("https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js", "mammoth");
+      const result = await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+      return result.value;
+    }
+
+    async function extractResumeText(file) {
+      const name = file.name.toLowerCase();
+      if (name.endsWith(".pdf") || file.type === "application/pdf") return extractPdfText(file);
+      if (name.endsWith(".docx")) return extractDocxText(file);
+      return file.text();
+    }
+
+    function analyzeResume(text) {
+      const normalized = text.toLowerCase();
+      const found = skillSignals.filter(skill => normalized.includes(skill.toLowerCase()));
+      const foundSet = new Set(found.map(skill => skill.toLowerCase()));
+      const matchedRequirements = opportunityRequirements.filter(skill => foundSet.has(skill.toLowerCase()));
+      const missing = opportunityRequirements.filter(skill => !foundSet.has(skill.toLowerCase()));
+      const fitScore = Math.min(96, Math.max(52, Math.round((matchedRequirements.length / opportunityRequirements.length) * 70 + 24)));
+      const summary = text.replace(/\s+/g, " ").trim().slice(0, 420);
+      return {
+        found,
+        missing,
+        fitScore,
+        summary: summary || "Resume uploaded, but no readable text was found."
+      };
+    }
+
+    function updateResumeAnalysis(analysis, fileName = "resume") {
+      resumeTextarea.value = analysis.summary;
+      if (analysis.found.length) {
+        skillsInput.value = analysis.found.slice(0, 8).join(", ");
+      }
+      resumeStrengthCard.innerHTML = `
+        <h3>Strong signals</h3>
+        <p>${analysis.found.length ? analysis.found.slice(0, 8).join(", ") : "Add more project and skill details for stronger matching."}</p>
+        <div class="fit-meter"><span style="width:${analysis.fitScore}%"></span></div>
+      `;
+      resumeGapCard.innerHTML = `
+        <h3>Missing proof</h3>
+        <p>${analysis.missing.length ? `Add evidence for: ${analysis.missing.slice(0, 6).join(", ")}.` : "Great coverage. Add metrics and links to make the proof stronger."}</p>
+        <div class="fit-meter"><span style="width:${Math.max(18, 100 - analysis.found.length * 7)}%"></span></div>
+      `;
+      details[0].insight = `Resume fit ${analysis.fitScore}: ${analysis.found.slice(0, 5).join(", ") || "profile signals"} match the AI product internship.`;
+      details[0].actions = [
+        analysis.missing.length ? `Add one proof point for ${analysis.missing[0]}.` : "Add one measurable result from your strongest project.",
+        "Include a live demo, GitHub link, or screenshot in your application.",
+        "Apply today with the generated founder-style outreach note."
+      ];
+      renderDetail(0);
+      setUploadStatus("Resume analyzed", `${fileName} scored ${analysis.fitScore}% fit. Review Resume Fit for gaps and next actions.`);
+    }
+
+    async function handleResumeFile(file) {
+      if (!file) return;
+      setUploadStatus("Analyzing resume", `${file.name} is being read locally in your browser.`);
+      try {
+        const text = await extractResumeText(file);
+        updateResumeAnalysis(analyzeResume(text), file.name);
+        navButtons.forEach(item => item.classList.remove("active"));
+        document.querySelector('[data-view-target="resume"]').classList.add("active");
+        views.forEach(view => view.classList.toggle("active", view.id === "view-resume"));
+      } catch (error) {
+        setUploadStatus("Upload needs text", "This file could not be read here. Paste the resume text into Resume summary and click Generate fit radar.");
+      }
+    }
+
+    importResumeButton.addEventListener("click", () => resumeFileInput.click());
+    resumeFileInput.addEventListener("change", event => handleResumeFile(event.target.files[0]));
+    generateFitButton.addEventListener("click", () => updateResumeAnalysis(analyzeResume(resumeTextarea.value), "pasted resume"));
+    refreshRadarButton.addEventListener("click", () => updateResumeAnalysis(analyzeResume(resumeTextarea.value), "current profile"));
 
     const authStatus = document.getElementById("auth-status");
     const signedOutActions = document.getElementById("signed-out-actions");
