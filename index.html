@@ -18,6 +18,7 @@
       --coral: #e25555;
       --gold: #b7791f;
       --green: #15803d;
+      --violet: #6d28d9;
       --shadow: 0 18px 50px rgba(15, 23, 42, .10);
     }
 
@@ -99,6 +100,47 @@
     .profile-card strong { display: block; }
     .profile-card span { color: #a9bdd4; font-size: 13px; }
 
+    .auth-box {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 8px;
+    }
+
+    .auth-box p {
+      margin: 0;
+      color: #a9bdd4;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .auth-actions .btn {
+      min-height: 38px;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    .auth-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+    }
+
+    .auth-status {
+      color: #a9bdd4;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
     main {
       padding: 24px;
       min-width: 0;
@@ -147,6 +189,12 @@
       background: var(--teal);
       color: white;
       border-color: var(--teal);
+    }
+
+    .btn.violet {
+      background: var(--violet);
+      color: white;
+      border-color: var(--violet);
     }
 
     .metrics {
@@ -501,6 +549,17 @@
         <button data-view-target="prep">Interview Prep</button>
         <button data-view-target="outreach">Outreach</button>
       </nav>
+      <div class="auth-box">
+        <p id="auth-status">Sign in to save your radar, shortlist, and outreach drafts.</p>
+        <div class="auth-actions" id="signed-out-actions">
+          <button class="btn" type="button" id="sign-in-button">Sign in</button>
+          <button class="btn violet" type="button" id="sign-up-button">Sign up</button>
+        </div>
+        <div class="auth-user" id="signed-in-actions" hidden>
+          <div id="user-button"></div>
+          <span class="auth-status">Account connected</span>
+        </div>
+      </div>
       <div class="profile-card">
         <strong>Ganesh Krishna</strong>
         <span>Full-stack + AI builder</span>
@@ -717,6 +776,7 @@
     </aside>
   </div>
 
+  <script src="clerk-config.js"></script>
   <script>
     const details = [
       {
@@ -799,6 +859,62 @@
         views.forEach(view => view.classList.toggle("active", view.id === `view-${target}`));
       });
     });
+
+    const authStatus = document.getElementById("auth-status");
+    const signedOutActions = document.getElementById("signed-out-actions");
+    const signedInActions = document.getElementById("signed-in-actions");
+    const signInButton = document.getElementById("sign-in-button");
+    const signUpButton = document.getElementById("sign-up-button");
+    const userButton = document.getElementById("user-button");
+
+    function updateAuthUi(isSignedIn) {
+      signedOutActions.hidden = isSignedIn;
+      signedInActions.hidden = !isSignedIn;
+      authStatus.textContent = isSignedIn
+        ? "Signed in. Your CareerRadar workspace is ready."
+        : "Sign in to save your radar, shortlist, and outreach drafts.";
+    }
+
+    function showClerkSetupMessage() {
+      authStatus.textContent = "Add your Clerk publishable key in clerk-config.js to enable auth.";
+      signInButton.addEventListener("click", () => alert("Create clerk-config.js from clerk-config.example.js and add your Clerk publishable key."));
+      signUpButton.addEventListener("click", () => alert("Create clerk-config.js from clerk-config.example.js and add your Clerk publishable key."));
+    }
+
+    async function loadClerk() {
+      const publishableKey = window.CLERK_PUBLISHABLE_KEY;
+      if (!publishableKey || publishableKey.includes("replace_me")) {
+        showClerkSetupMessage();
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.setAttribute("data-clerk-publishable-key", publishableKey);
+      script.src = "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js";
+      document.body.appendChild(script);
+
+      script.addEventListener("load", async () => {
+        await window.Clerk.load();
+        updateAuthUi(Boolean(window.Clerk.user));
+        if (window.Clerk.user) {
+          window.Clerk.mountUserButton(userButton);
+        }
+        signInButton.addEventListener("click", () => window.Clerk.openSignIn());
+        signUpButton.addEventListener("click", () => window.Clerk.openSignUp());
+        window.Clerk.addListener(({ user }) => {
+          updateAuthUi(Boolean(user));
+          if (user) window.Clerk.mountUserButton(userButton);
+        });
+      });
+
+      script.addEventListener("error", () => {
+        authStatus.textContent = "Clerk could not load. Check your network and publishable key.";
+      });
+    }
+
+    loadClerk();
   </script>
 </body>
 </html>

@@ -15,3 +15,19 @@ CareerRadar AI is an AI-powered opportunity copilot for students. It helps them 
 
 Open `index.html` in a browser. It is a static prototype, so no install step is required.
 
+## Clerk authentication setup
+
+This prototype includes Clerk-powered sign-in, sign-up, and signed-in user controls for a static HTML app.
+
+1. Open `clerk-config.js`.
+2. Replace `pk_test_replace_me` with your Clerk publishable key.
+3. Start the local server:
+
+```bash
+python -m http.server 4173 --bind 127.0.0.1
+```
+
+4. Open `http://127.0.0.1:4173/index.html`.
+5. Use the Sign in or Sign up buttons in the app header.
+
+Do not add `CLERK_SECRET_KEY` to any client-side file.
