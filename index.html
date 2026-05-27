@@ -510,6 +510,13 @@
       background: #f8fafc;
       padding: 12px;
       margin-top: 12px;
+      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+    }
+
+    .upload-card.dragging {
+      border-color: var(--teal);
+      background: #ecfeff;
+      transform: translateY(-1px);
     }
 
     .upload-card strong {
@@ -745,9 +752,13 @@
           <input id="resume-file" type="file" accept=".pdf,.docx,.txt,.md,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
           <div class="upload-card" id="resume-upload-status">
             <strong>Resume upload</strong>
-            <span>Upload PDF, DOCX, TXT, or MD. CareerRadar will extract skills, score fit, and suggest gaps.</span>
+            <span>Upload or drop PDF, DOCX, TXT, or MD. CareerRadar will extract skills, score fit, and suggest gaps.</span>
           </div>
-          <button type="button" class="btn primary" id="generate-fit-button" style="width:100%; margin-top:14px;">Generate fit radar</button>
+          <div class="actions" style="margin-top:14px;">
+            <button type="button" class="btn primary" id="generate-fit-button" style="flex:1;">Generate fit radar</button>
+            <button type="button" class="btn" id="sample-resume-button" style="flex:1;">Try sample</button>
+          </div>
+          <button type="button" class="btn" id="download-report-button" style="width:100%; margin-top:10px;">Download analysis report</button>
         </form>
 
         <section class="opportunities" aria-label="Opportunity recommendations">
@@ -898,12 +909,15 @@
     const importResumeButton = document.getElementById("import-resume-button");
     const refreshRadarButton = document.getElementById("refresh-radar-button");
     const generateFitButton = document.getElementById("generate-fit-button");
+    const sampleResumeButton = document.getElementById("sample-resume-button");
+    const downloadReportButton = document.getElementById("download-report-button");
     const resumeFileInput = document.getElementById("resume-file");
     const resumeTextarea = document.getElementById("resume");
     const skillsInput = document.getElementById("skills");
     const uploadStatus = document.getElementById("resume-upload-status");
     const resumeStrengthCard = document.getElementById("resume-strength-card");
     const resumeGapCard = document.getElementById("resume-gap-card");
+    let latestResumeAnalysis = null;
 
     const skillSignals = [
       "React", "Node.js", "MongoDB", "OpenAI APIs", "JavaScript", "TypeScript",
@@ -978,11 +992,13 @@
         found,
         missing,
         fitScore,
-        summary: summary || "Resume uploaded, but no readable text was found."
+        summary: summary || "Resume uploaded, but no readable text was found.",
+        wordCount: text.trim() ? text.trim().split(/\s+/).length : 0
       };
     }
 
     function updateResumeAnalysis(analysis, fileName = "resume") {
+      latestResumeAnalysis = { ...analysis, fileName, updatedAt: new Date().toLocaleString() };
       resumeTextarea.value = analysis.summary;
       if (analysis.found.length) {
         skillsInput.value = analysis.found.slice(0, 8).join(", ");
@@ -1025,6 +1041,55 @@
     resumeFileInput.addEventListener("change", event => handleResumeFile(event.target.files[0]));
     generateFitButton.addEventListener("click", () => updateResumeAnalysis(analyzeResume(resumeTextarea.value), "pasted resume"));
     refreshRadarButton.addEventListener("click", () => updateResumeAnalysis(analyzeResume(resumeTextarea.value), "current profile"));
+    sampleResumeButton.addEventListener("click", () => {
+      const sampleResume = [
+        "Ganesh Krishna Reddy",
+        "Full-stack AI builder with React, Node.js, MongoDB, OpenAI APIs, JavaScript, and deployment experience.",
+        "Built CareerRadar AI, a recommendation product for internships, hackathons, outreach, and interview preparation.",
+        "Created GitHub projects, analytics dashboards, resume tooling, and AI automation workflows for students."
+      ].join(" ");
+      updateResumeAnalysis(analyzeResume(sampleResume), "sample resume");
+      navButtons.forEach(item => item.classList.remove("active"));
+      document.querySelector('[data-view-target="resume"]').classList.add("active");
+      views.forEach(view => view.classList.toggle("active", view.id === "view-resume"));
+    });
+
+    downloadReportButton.addEventListener("click", () => {
+      const analysis = latestResumeAnalysis || analyzeResume(resumeTextarea.value);
+      const report = [
+        "CareerRadar AI - Resume Fit Report",
+        `Generated: ${new Date().toLocaleString()}`,
+        `Fit score: ${analysis.fitScore}%`,
+        `Detected skills: ${(analysis.found || []).join(", ") || "None detected"}`,
+        `Missing proof: ${(analysis.missing || []).join(", ") || "No major gaps"}`,
+        "",
+        "Resume summary:",
+        resumeTextarea.value,
+        "",
+        "Recommended next actions:",
+        "- Add measurable outcomes to your strongest project.",
+        "- Include a GitHub, demo, or screenshot proof link.",
+        "- Use the outreach draft to apply today."
+      ].join("\n");
+      const blob = new Blob([report], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "careerradar-resume-fit-report.txt";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    uploadStatus.addEventListener("dragover", event => {
+      event.preventDefault();
+      uploadStatus.classList.add("dragging");
+    });
+    uploadStatus.addEventListener("dragleave", () => uploadStatus.classList.remove("dragging"));
+    uploadStatus.addEventListener("drop", event => {
+      event.preventDefault();
+      uploadStatus.classList.remove("dragging");
+      handleResumeFile(event.dataTransfer.files[0]);
+    });
 
     const authStatus = document.getElementById("auth-status");
     const signedOutActions = document.getElementById("signed-out-actions");
