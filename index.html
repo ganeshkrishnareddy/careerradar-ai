@@ -3,1149 +3,306 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CareerRadar AI</title>
+  <title>CareerRadar AI - Stop missing opportunities</title>
   <link rel="icon" href="assets/careerradar-logo.svg" type="image/svg+xml">
   <style>
     :root {
-      color-scheme: light;
-      --ink: #14213d;
+      --dark: #0a0f14;
+      --ink: #102033;
       --muted: #64748b;
       --line: #dbe4ee;
+      --teal: #1a9e75;
+      --teal-dark: #0f766e;
       --paper: #f8fafc;
       --panel: #ffffff;
-      --teal: #0f766e;
-      --blue: #2563eb;
-      --coral: #e25555;
-      --gold: #b7791f;
-      --green: #15803d;
-      --violet: #6d28d9;
-      --shadow: 0 18px 50px rgba(15, 23, 42, .10);
     }
-
     * { box-sizing: border-box; }
-
-    [hidden] { display: none !important; }
-
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--ink);
-      background: var(--paper);
-      overflow-x: hidden;
+      background: white;
     }
-
-    button, input, textarea, select {
-      font: inherit;
-    }
-
-    .app {
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr) 360px;
-    }
-
-    .sidebar {
-      background: #0b172a;
-      color: #e5eef9;
-      padding: 24px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      font-size: 20px;
-    }
-
-    .mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
-      background: #f8fafc url("assets/careerradar-logo.svg") center / cover no-repeat;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.16), 0 10px 24px rgba(0,0,0,.24);
-      flex: 0 0 auto;
-    }
-
+    a { color: inherit; text-decoration: none; }
     .nav {
-      display: grid;
-      gap: 6px;
-    }
-
-    .nav button {
-      border: 0;
-      background: transparent;
-      color: #b6c7dd;
-      padding: 11px 12px;
-      border-radius: 8px;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .nav button.active,
-    .nav button:hover {
-      background: rgba(255,255,255,.09);
-      color: white;
-    }
-
-    .profile-card {
-      margin-top: auto;
-      padding: 14px;
-      background: rgba(255,255,255,.08);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 8px;
-    }
-
-    .profile-card strong { display: block; }
-    .profile-card span { color: #a9bdd4; font-size: 13px; }
-
-    .auth-box {
-      display: grid;
-      gap: 10px;
-      padding: 14px;
-      background: rgba(255,255,255,.07);
-      border: 1px solid rgba(255,255,255,.12);
-      border-radius: 8px;
-    }
-
-    .auth-box p {
-      margin: 0;
-      color: #a9bdd4;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .auth-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .auth-actions .btn {
-      min-height: 38px;
-      padding: 8px 10px;
-      font-size: 13px;
-    }
-
-    .auth-user {
+      position: sticky;
+      top: 0;
+      z-index: 20;
       display: flex;
       align-items: center;
-      gap: 10px;
-      min-height: 42px;
-    }
-
-    .auth-status {
-      color: #a9bdd4;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    main {
-      padding: 24px;
-      min-width: 0;
-    }
-
-    .topbar {
-      display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 18px;
+      gap: 20px;
+      padding: 16px clamp(18px, 4vw, 54px);
+      background: rgba(10, 15, 20, .88);
+      color: white;
+      backdrop-filter: blur(16px);
     }
-
-    h1 {
-      margin: 0 0 4px;
-      font-size: 28px;
-      letter-spacing: 0;
-      line-height: 1.12;
-    }
-
-    .subtle {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+    .brand img { width: 38px; height: 38px; border-radius: 8px; }
+    .navlinks { display: flex; gap: 22px; color: #cbd5e1; font-size: 14px; }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
     .btn {
-      border: 1px solid var(--line);
-      background: var(--panel);
-      color: var(--ink);
+      border: 1px solid rgba(255,255,255,.22);
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 11px 16px;
+      font-weight: 800;
       cursor: pointer;
-      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       min-height: 42px;
     }
-
-    .btn.primary {
-      background: var(--teal);
+    .btn.primary { background: var(--teal); color: white; border-color: var(--teal); }
+    .btn.light { background: white; color: var(--ink); border-color: white; }
+    .hero {
+      min-height: 86vh;
       color: white;
-      border-color: var(--teal);
-    }
-
-    .btn.violet {
-      background: var(--violet);
-      color: white;
-      border-color: var(--violet);
-    }
-
-    .metrics {
+      background: radial-gradient(circle at 74% 26%, rgba(26,158,117,.34), transparent 28%), linear-gradient(180deg, #0a0f14 0%, #101820 100%);
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin: 18px 0;
-    }
-
-    .metric, .panel, .opportunity, .right-panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: 0 1px 0 rgba(15, 23, 42, .03);
-    }
-
-    .metric {
-      padding: 16px;
-    }
-
-    .metric b {
-      font-size: 25px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .metric span {
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .workspace {
-      display: grid;
-      grid-template-columns: 310px minmax(0, 1fr);
-      gap: 14px;
-      align-items: start;
-    }
-
-    .panel {
-      padding: 18px;
-    }
-
-    .panel h2, .right-panel h2 {
-      margin: 0 0 14px;
-      font-size: 17px;
-    }
-
-    label {
-      display: block;
-      color: #334155;
-      font-weight: 700;
-      font-size: 13px;
-      margin: 12px 0 6px;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px 11px;
-      background: #fbfdff;
-      color: var(--ink);
-    }
-
-    textarea { min-height: 94px; resize: vertical; }
-
-    .chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 10px 0 4px;
-    }
-
-    .chip {
-      border: 1px solid var(--line);
-      background: #f7fbff;
-      color: #334155;
-      border-radius: 999px;
-      padding: 7px 10px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .opportunities {
-      display: grid;
-      gap: 12px;
-    }
-
-    .opportunity {
-      padding: 16px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 14px;
-      cursor: pointer;
-    }
-
-    .opportunity.selected {
-      outline: 2px solid #14b8a6;
-      border-color: transparent;
-      box-shadow: var(--shadow);
-    }
-
-    .opportunity h3 {
-      margin: 0 0 6px;
-      font-size: 18px;
-    }
-
-    .meta {
-      color: var(--muted);
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
-
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .tag {
-      background: #eef6ff;
-      color: #1d4ed8;
-      border-radius: 999px;
-      padding: 6px 9px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .score {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: radial-gradient(circle at center, white 55%, transparent 57%), conic-gradient(var(--green) var(--pct), #e2e8f0 0);
-      font-weight: 900;
-      color: var(--green);
-    }
-
-    aside {
-      background: #f1f5f9;
-      border-left: 1px solid var(--line);
-      padding: 24px 18px;
-    }
-
-    .right-panel {
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-
-    .detail-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .badge {
-      border-radius: 999px;
-      padding: 6px 9px;
-      color: #fff;
-      background: var(--coral);
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .insight {
-      border-left: 4px solid var(--teal);
-      background: #ecfeff;
-      padding: 12px;
-      border-radius: 6px;
-      line-height: 1.45;
-      margin: 12px 0;
-    }
-
-    .task-list {
-      display: grid;
-      gap: 10px;
-      margin: 12px 0 18px;
-    }
-
-    .task {
-      display: grid;
-      grid-template-columns: 20px 1fr;
-      gap: 10px;
-      align-items: start;
-      color: #334155;
-      font-size: 14px;
-    }
-
-    .check {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
-      background: var(--green);
-      color: white;
-      display: grid;
-      place-items: center;
-      font-size: 12px;
-      font-weight: 900;
-    }
-
-    .outreach {
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      border-radius: 8px;
-      padding: 12px;
-      color: #7c2d12;
-      line-height: 1.45;
-      font-size: 14px;
-    }
-
-    .progress {
-      height: 8px;
-      border-radius: 999px;
-      background: #e2e8f0;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .progress span {
-      display: block;
-      height: 100%;
-      width: 70%;
-      background: linear-gradient(90deg, var(--teal), var(--blue), var(--gold));
-    }
-
-    .view {
-      display: none;
-    }
-
-    .view.active {
-      display: block;
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 520px);
+      gap: 44px;
+      padding: 80px clamp(18px, 5vw, 70px) 64px;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
     }
-
-    .grid-two {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .mini-card {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 16px;
-    }
-
-    .mini-card h3 {
-      margin: 0 0 8px;
-      font-size: 17px;
-    }
-
-    .mini-card p {
+    .hero h1 {
       margin: 0;
-      color: var(--muted);
-      line-height: 1.5;
+      font-size: clamp(42px, 6vw, 78px);
+      line-height: .98;
+      letter-spacing: 0;
+      max-width: 760px;
     }
-
-    .status-row {
+    .hero p {
+      color: #cbd5e1;
+      font-size: 20px;
+      line-height: 1.55;
+      max-width: 650px;
+      margin: 22px 0 28px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .radar-visual {
+      position: relative;
+      aspect-ratio: 1;
+      min-height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,158,117,.18) 0 9%, transparent 10% 24%, rgba(26,158,117,.14) 25% 26%, transparent 27% 49%, rgba(26,158,117,.14) 50% 51%, transparent 52%), #071015;
+      border: 1px solid rgba(255,255,255,.12);
+      overflow: hidden;
+      box-shadow: 0 28px 80px rgba(0,0,0,.35);
+    }
+    .radar-visual:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: conic-gradient(from 0deg, rgba(26,158,117,.75), rgba(26,158,117,.18) 20deg, transparent 74deg);
+      animation: sweep 3.4s linear infinite;
+    }
+    .ping {
+      position: absolute;
+      width: 190px;
+      background: white;
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 14px;
+      box-shadow: 0 18px 48px rgba(0,0,0,.32);
+      animation: ping 3.4s ease-in-out infinite;
+    }
+    .ping b { display: block; font-size: 24px; color: var(--teal-dark); }
+    .ping span { color: var(--muted); font-size: 13px; }
+    .ping.one { top: 18%; left: 52%; }
+    .ping.two { top: 48%; left: 12%; animation-delay: .7s; }
+    .ping.three { bottom: 14%; right: 12%; animation-delay: 1.35s; }
+    section { padding: 72px clamp(18px, 5vw, 70px); }
+    .proof {
       display: grid;
-      grid-template-columns: 110px 1fr auto;
-      gap: 10px;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
       align-items: center;
-      padding: 12px 0;
+      background: white;
       border-bottom: 1px solid var(--line);
     }
-
-    .status-row:last-child {
-      border-bottom: 0;
-    }
-
-    .pill {
-      display: inline-flex;
-      justify-content: center;
-      border-radius: 999px;
-      padding: 6px 9px;
-      background: #e0f2fe;
-      color: #075985;
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .fit-meter {
-      height: 12px;
-      background: #e2e8f0;
-      border-radius: 999px;
-      overflow: hidden;
-      margin: 10px 0;
-    }
-
-    .fit-meter span {
-      display: block;
-      height: 100%;
-      background: linear-gradient(90deg, var(--teal), var(--blue));
-    }
-
-    .upload-card {
-      border: 1px dashed #94a3b8;
+    .schools, .stats { display: flex; flex-wrap: wrap; gap: 16px; color: #475569; font-weight: 800; }
+    .stats span { color: var(--teal-dark); }
+    .section-title { max-width: 780px; margin-bottom: 28px; }
+    .section-title h2 { font-size: clamp(30px, 4vw, 48px); margin: 0 0 10px; line-height: 1.08; }
+    .section-title p { color: var(--muted); font-size: 18px; line-height: 1.55; margin: 0; }
+    .dark-band { background: #101820; color: white; }
+    .grid-3, .grid-2 { display: grid; gap: 18px; }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      border: 1px solid var(--line);
       border-radius: 8px;
-      background: #f8fafc;
-      padding: 12px;
-      margin-top: 12px;
-      transition: border-color .18s ease, background .18s ease, transform .18s ease;
+      background: var(--panel);
+      padding: 22px;
+      min-height: 160px;
+      box-shadow: 0 1px 0 rgba(15,23,42,.04);
     }
-
-    .upload-card.dragging {
-      border-color: var(--teal);
-      background: #ecfeff;
-      transform: translateY(-1px);
+    .dark-band .card { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); }
+    .card h3 { margin: 0 0 10px; font-size: 20px; }
+    .card p, .card li { color: var(--muted); line-height: 1.55; }
+    .dark-band .card p { color: #cbd5e1; }
+    .demo {
+      background: var(--paper);
     }
-
-    .upload-card strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .upload-card span {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.4;
-    }
-
-    .analysis-list {
+    .demo-shell {
       display: grid;
-      gap: 8px;
-      margin-top: 10px;
-      color: #334155;
-      font-size: 14px;
-      line-height: 1.45;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: white;
+      padding: 18px;
     }
-
-    @media (max-width: 1100px) {
-      .app { grid-template-columns: 220px minmax(0, 1fr); }
-      aside { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
-      .right-panel { max-width: none; }
+    .demo-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
     }
-
-    @media (max-width: 820px) {
-      .app { display: block; }
-      .sidebar { min-height: auto; width: 100%; }
-      .workspace, .metrics { grid-template-columns: 1fr; }
-      .grid-two { grid-template-columns: 1fr; }
-      .status-row { grid-template-columns: 1fr; }
-      .topbar { align-items: flex-start; flex-direction: column; }
-      main, aside, .sidebar {
-        max-width: 100vw;
-        overflow: hidden;
-      }
-      main, aside { padding: 18px; }
-      .opportunity { grid-template-columns: 1fr; }
-      h1 { font-size: 26px; max-width: 12ch; }
-      .actions {
-        width: 100%;
-        flex-direction: column;
-      }
-      .actions .btn { width: 100%; }
-      .actions .btn {
-        flex: none;
-        min-width: 0;
-        white-space: normal;
-      }
+    .score { color: var(--teal-dark); font-size: 24px; font-weight: 900; }
+    .pricing .card:nth-child(2) { border: 2px solid var(--teal); transform: translateY(-8px); }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: white;
+      margin-bottom: 10px;
+    }
+    summary { cursor: pointer; font-weight: 900; }
+    .final { background: #0a0f14; color: white; text-align: center; }
+    .final h2 { margin: 0 0 12px; font-size: clamp(34px, 5vw, 56px); }
+    footer {
+      background: #071015;
+      color: #cbd5e1;
+      padding: 34px clamp(18px, 5vw, 70px);
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    @keyframes sweep { to { transform: rotate(360deg); } }
+    @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spinIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+    @keyframes ping { 0%, 70%, 100% { opacity: .58; transform: scale(.96); } 18%, 42% { opacity: 1; transform: scale(1); } }
+    @media (max-width: 900px) {
+      .navlinks { display: none; }
+      .hero, .proof, .demo-shell { grid-template-columns: 1fr; }
+      .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .radar-visual { min-height: 320px; }
+      .ping { width: 160px; }
+      .pricing .card:nth-child(2) { transform: none; }
     }
   </style>
 </head>
 <body>
-  <div class="app">
-    <section class="sidebar">
-      <div class="brand">
-        <div class="mark" aria-hidden="true"></div>
-        <div>CareerRadar AI</div>
+  <nav class="nav">
+    <a class="brand" href="/"><img src="assets/careerradar-logo.svg" alt="">CareerRadar AI</a>
+    <div class="navlinks">
+      <a href="#how">How it works</a><a href="#features">Features</a><a href="#pricing">Pricing</a><a href="#demo">Demo</a>
+    </div>
+    <div class="nav-actions"><a href="radar.html">Sign in</a><a class="btn primary" href="radar.html">Get started</a></div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Stop missing opportunities. Start winning them.</h1>
+      <p>CareerRadar AI scans internships, hackathons, and cohorts, ranks them by your resume fit, drafts your outreach, and tells you exactly what to do next.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="radar.html">Get my opportunity radar -></a>
+        <a class="btn light" href="#demo">See a live demo</a>
       </div>
-      <nav class="nav" aria-label="Primary">
-        <button class="active" data-view-target="radar">Radar</button>
-        <button data-view-target="shortlist">Shortlist</button>
-        <button data-view-target="resume">Resume Fit</button>
-        <button data-view-target="prep">Interview Prep</button>
-        <button data-view-target="outreach">Outreach</button>
-      </nav>
-      <div class="auth-box">
-        <p id="auth-status">Sign in to save your radar, shortlist, and outreach drafts.</p>
-        <div class="auth-actions" id="signed-out-actions">
-          <button class="btn" type="button" id="sign-in-button">Sign in</button>
-          <button class="btn violet" type="button" id="sign-up-button">Sign up</button>
-        </div>
-        <div class="auth-user" id="signed-in-actions" hidden>
-          <div id="user-button"></div>
-          <span class="auth-status">Account connected</span>
-        </div>
+    </div>
+    <div class="radar-visual" aria-label="Animated opportunity radar">
+      <div class="ping one"><b>91</b><span>AI Product Internship</span></div>
+      <div class="ping two"><b>88</b><span>Student AI Hackathon</span></div>
+      <div class="ping three"><b>76</b><span>Placement Prep Cohort</span></div>
+    </div>
+  </header>
+
+  <section class="proof">
+    <div><strong>Trusted by students at</strong><div class="schools">IIT Delhi · BITS Pilani · NIT Trichy · VIT · IIIT Hyderabad · DTU</div></div>
+    <div class="stats"><span>2,400+</span> opportunities tracked <span>890+</span> students matched <span>4.9</span> avg accuracy</div>
+  </section>
+
+  <section class="dark-band">
+    <div class="section-title"><h2>The real reason you keep missing out</h2></div>
+    <div class="grid-3">
+      <div class="card"><h3>You find out too late</h3><p>Deadlines pass before opportunities reach your college group or feed.</p></div>
+      <div class="card"><h3>Your resume does not match</h3><p>You apply with the right skills hidden and the wrong keywords missing.</p></div>
+      <div class="card"><h3>You do not know what to say</h3><p>Outreach feels awkward, so good leads turn into silent missed chances.</p></div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="section-title"><h2>How it works</h2><p>Three steps from scattered opportunity search to a focused action plan.</p></div>
+    <div class="grid-3">
+      <div class="card"><h3>1. Drop your resume</h3><p>Paste your resume or upload PDF/DOCX. CareerRadar extracts your skills, projects, and goals.</p></div>
+      <div class="card"><h3>2. Get your ranked radar</h3><p>AI scores every opportunity against your profile and shows what matches or is missing.</p></div>
+      <div class="card"><h3>3. Take action today</h3><p>Get resume fixes, outreach drafts, and interview prep for the exact opportunity.</p></div>
+    </div>
+  </section>
+
+  <section id="features" class="demo">
+    <div class="section-title"><h2>Everything you need to land what you are building for</h2></div>
+    <div class="grid-3">
+      <div class="card"><h3>Opportunity Radar</h3><p>AI-ranked internships, hackathons, and cohorts updated around your profile.</p></div>
+      <div class="card"><h3>Resume Fit Score</h3><p>See exactly how well your resume matches and what keywords are missing.</p></div>
+      <div class="card"><h3>Resume Bullet Rewriter</h3><p>Turn weak bullets into metrics-driven, role-specific proof.</p></div>
+      <div class="card"><h3>Outreach Generator</h3><p>Personalized LinkedIn notes and cold emails from your profile and role details.</p></div>
+      <div class="card"><h3>Interview Prep Cockpit</h3><p>Role-specific questions, founder-style answers, and demo checklists.</p></div>
+      <div class="card"><h3>Shortlist Tracker</h3><p>Save opportunities, track status, and export your tracker.</p></div>
+    </div>
+  </section>
+
+  <section id="demo">
+    <div class="section-title"><h2>See it work on a real profile</h2><p>This is what your radar looks like.</p></div>
+    <div class="demo-shell">
+      <div class="card"><h3>Ganesh Krishna</h3><p>React, Node.js, MongoDB, OpenAI APIs, AI automation, hackathon shipping.</p><a class="btn primary" href="radar.html">Generate yours free -></a></div>
+      <div>
+        <div class="demo-card"><span class="score">91</span> AI Product Builder Internship</div>
+        <div class="demo-card"><span class="score">88</span> Student AI Tools Hackathon</div>
+        <div class="demo-card"><span class="score">76</span> Campus Placement Prep Cohort</div>
       </div>
-      <div class="profile-card">
-        <strong>Ganesh Krishna</strong>
-        <span>Full-stack + AI builder</span>
-        <div class="progress"><span></span></div>
-      </div>
-    </section>
+    </div>
+  </section>
 
-    <main>
-      <section class="view active" id="view-radar">
-      <div class="topbar">
-        <div>
-          <h1>Opportunity radar for this week</h1>
-          <p class="subtle">AI-ranked internships, hackathons, jobs, and learning opportunities based on your profile.</p>
-        </div>
-        <div class="actions">
-          <button class="btn" type="button" id="import-resume-button">Import resume</button>
-          <button class="btn primary" type="button" id="refresh-radar-button">Refresh radar</button>
-        </div>
-      </div>
+  <section class="dark-band">
+    <div class="section-title"><h2>Students are already turning radar into action</h2></div>
+    <div class="grid-3">
+      <div class="card"><p>"Got an AI internship within 2 weeks. The fit score told me exactly why I was a match."</p><strong>Priya S., NIT Trichy</strong></div>
+      <div class="card"><p>"Applied to 3 hackathons. Won one, shortlisted in two. The outreach draft was excellent."</p><strong>Arjun M., BITS Goa</strong></div>
+      <div class="card"><p>"Resume Fit showed I was missing embeddings and structured outputs. Added a project, got the call."</p><strong>Sneha R., VIT Vellore</strong></div>
+    </div>
+  </section>
 
-      <section class="metrics" aria-label="CareerRadar summary">
-        <div class="metric"><b>18</b><span>matched opportunities</span></div>
-        <div class="metric"><b>4</b><span>urgent deadlines</span></div>
-        <div class="metric"><b>91%</b><span>top fit score</span></div>
-        <div class="metric"><b>6</b><span>actions ready</span></div>
-      </section>
-      </section>
+  <section id="pricing" class="pricing">
+    <div class="section-title"><h2>Simple pricing. Cancel anytime.</h2></div>
+    <div class="grid-3">
+      <div class="card"><h3>Free</h3><p>1 radar/week, 3 saves, basic fit score, sample outreach.</p><a class="btn" href="radar.html">Start free</a></div>
+      <div class="card"><h3>Pro - Rs 299/mo</h3><p>Unlimited radar, tracker, rewrites, outreach drafts, interview prep, priority updates.</p><a class="btn primary" href="radar.html">Go Pro -></a></div>
+      <div class="card"><h3>Hackathon Bundle - Rs 99</h3><p>7-day full Pro access built for hackathon sprint mode.</p><a class="btn" href="radar.html">Get bundle</a></div>
+    </div>
+  </section>
 
-      <section class="view" id="view-shortlist">
-        <div class="section-head">
-          <div>
-            <h1>Saved opportunity shortlist</h1>
-            <p class="subtle">Track the highest-signal opportunities and what needs to happen next.</p>
-          </div>
-          <button class="btn primary">Export tracker</button>
-        </div>
-        <div class="panel">
-          <div class="status-row">
-            <span class="pill">Apply today</span>
-            <strong>AI Product Builder Internship</strong>
-            <button class="btn">Open plan</button>
-          </div>
-          <div class="status-row">
-            <span class="pill">Submit proof</span>
-            <strong>Student AI Tools Hackathon</strong>
-            <button class="btn">Demo prep</button>
-          </div>
-          <div class="status-row">
-            <span class="pill">Save later</span>
-            <strong>Campus Placement Prep Cohort</strong>
-            <button class="btn">Review fit</button>
-          </div>
-        </div>
-      </section>
+  <section class="demo">
+    <div class="section-title"><h2>FAQ</h2></div>
+    <details><summary>How does the fit score work?</summary><p>It compares your resume skills, projects, and goals against opportunity requirements.</p></details>
+    <details><summary>What opportunities does CareerRadar track?</summary><p>Internships, hackathons, cohorts, scholarships, and early-career roles.</p></details>
+    <details><summary>Do I need to upload my resume?</summary><p>No. You can paste a summary, but uploading improves the analysis.</p></details>
+    <details><summary>Is my data private?</summary><p>The static MVP analyzes locally in the browser. Production will add privacy controls.</p></details>
+    <details><summary>Can I use this for full-time jobs?</summary><p>Yes, the same fit and action workflow can apply to full-time roles.</p></details>
+  </section>
 
-      <section class="view" id="view-resume">
-        <div class="section-head">
-          <div>
-            <h1>Resume fit analysis</h1>
-            <p class="subtle">What your resume already proves, and what to improve before applying.</p>
-          </div>
-          <button class="btn primary">Rewrite bullet</button>
-        </div>
-        <div class="grid-two">
-          <div class="mini-card" id="resume-strength-card">
-            <h3>Strong signals</h3>
-            <p>React, Node.js, MongoDB, OpenAI APIs, AI automation, and student-product experience are clear matches.</p>
-            <div class="fit-meter"><span style="width:86%"></span></div>
-          </div>
-          <div class="mini-card" id="resume-gap-card">
-            <h3>Missing proof</h3>
-            <p>Add metrics: users helped, time saved, recommendations generated, or outreach messages produced.</p>
-            <div class="fit-meter"><span style="width:58%"></span></div>
-          </div>
-          <div class="mini-card">
-            <h3>Suggested resume bullet</h3>
-            <p>Built CareerRadar AI, an AI opportunity copilot that ranks internships and hackathons by resume fit and generates next-step actions.</p>
-          </div>
-          <div class="mini-card">
-            <h3>Top keyword gaps</h3>
-            <p>Recommendation systems, embeddings, structured outputs, user feedback loop, deployment, analytics.</p>
-          </div>
-        </div>
-      </section>
+  <section class="final">
+    <h2>Your next opportunity is already live. Are you on the radar?</h2>
+    <a class="btn primary" href="radar.html">Get my radar now -></a>
+    <p>Free to start. No credit card needed.</p>
+  </section>
 
-      <section class="view" id="view-prep">
-        <div class="section-head">
-          <div>
-            <h1>Interview prep cockpit</h1>
-            <p class="subtle">Role-specific questions and crisp demo stories for the opportunities you saved.</p>
-          </div>
-          <button class="btn primary">Start mock round</button>
-        </div>
-        <div class="grid-two">
-          <div class="mini-card">
-            <h3>Product story</h3>
-            <p>Explain why students miss opportunities, how CareerRadar narrows the problem, and what the MVP proves.</p>
-          </div>
-          <div class="mini-card">
-            <h3>Technical question</h3>
-            <p>How would you use embeddings and structured outputs to rank a student profile against an opportunity?</p>
-          </div>
-          <div class="mini-card">
-            <h3>Founder-style answer</h3>
-            <p>I chose a narrow MVP because the painful moment is not search. It is deciding what is worth applying to today.</p>
-          </div>
-          <div class="mini-card">
-            <h3>Demo checklist</h3>
-            <p>Profile intake, ranked cards, fit explanation, resume gap, outreach draft, saved progress.</p>
-          </div>
-        </div>
-      </section>
-
-      <section class="view" id="view-outreach">
-        <div class="section-head">
-          <div>
-            <h1>Outreach generator</h1>
-            <p class="subtle">Personalized LinkedIn and email drafts for internships, mentors, and beta users.</p>
-          </div>
-          <button class="btn primary">Copy message</button>
-        </div>
-        <div class="panel">
-          <h2>LinkedIn note</h2>
-          <div class="outreach">
-            Hi, I am Ganesh, building CareerRadar AI during the OpenAI x Outskill hackathon. It helps students discover internships, hackathons, and learning opportunities with AI-ranked fit scores, resume gaps, and outreach drafts. I would love your feedback on the MVP.
-          </div>
-          <h2 style="margin-top:18px;">Beta user ask</h2>
-          <div class="outreach">
-            If you are a student looking for internships or hackathons, I am testing CareerRadar AI this week. Send me your target role and skills, and I will generate a personalized opportunity radar for you.
-          </div>
-        </div>
-      </section>
-
-      <section class="workspace">
-        <form class="panel">
-          <h2>Student profile</h2>
-          <label for="goal">Career goal</label>
-          <select id="goal">
-            <option>AI product internships</option>
-            <option>Frontend internships</option>
-            <option>Hackathons and grants</option>
-          </select>
-          <label for="skills">Core skills</label>
-          <input id="skills" value="React, Node.js, MongoDB, OpenAI APIs">
-          <div class="chips">
-            <span class="chip">Full-stack</span>
-            <span class="chip">AI tools</span>
-            <span class="chip">Automation</span>
-            <span class="chip">Student projects</span>
-          </div>
-          <label for="resume">Resume summary</label>
-          <textarea id="resume">Built full-stack apps with React, Node.js, MongoDB, and AI automation. Interested in internships, hackathons, and student-focused AI products.</textarea>
-          <input id="resume-file" type="file" accept=".pdf,.docx,.txt,.md,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
-          <div class="upload-card" id="resume-upload-status">
-            <strong>Resume upload</strong>
-            <span>Upload or drop PDF, DOCX, TXT, or MD. CareerRadar will extract skills, score fit, and suggest gaps.</span>
-          </div>
-          <div class="actions" style="margin-top:14px;">
-            <button type="button" class="btn primary" id="generate-fit-button" style="flex:1;">Generate fit radar</button>
-            <button type="button" class="btn" id="sample-resume-button" style="flex:1;">Try sample</button>
-          </div>
-          <button type="button" class="btn" id="download-report-button" style="width:100%; margin-top:10px;">Download analysis report</button>
-        </form>
-
-        <section class="opportunities" aria-label="Opportunity recommendations">
-          <article class="opportunity selected" data-index="0">
-            <div>
-              <h3>AI Product Builder Internship</h3>
-              <div class="meta">Remote · Startup · Apply in 3 days</div>
-              <div class="tags">
-                <span class="tag">React</span><span class="tag">OpenAI APIs</span><span class="tag">MVP shipping</span>
-              </div>
-            </div>
-            <div class="score" style="--pct: 91%;">91</div>
-          </article>
-          <article class="opportunity" data-index="1">
-            <div>
-              <h3>Student AI Tools Hackathon</h3>
-              <div class="meta">Online · Prize track · Deadline tomorrow</div>
-              <div class="tags">
-                <span class="tag">AI agents</span><span class="tag">Demo video</span><span class="tag">Launch</span>
-              </div>
-            </div>
-            <div class="score" style="--pct: 88%;">88</div>
-          </article>
-          <article class="opportunity" data-index="2">
-            <div>
-              <h3>Campus Placement Prep Cohort</h3>
-              <div class="meta">Hybrid · 4 weeks · Starts Monday</div>
-              <div class="tags">
-                <span class="tag">DSA</span><span class="tag">Resume review</span><span class="tag">Mock interviews</span>
-              </div>
-            </div>
-            <div class="score" style="--pct: 76%;">76</div>
-          </article>
-        </section>
-      </section>
-    </main>
-
-    <aside>
-      <section class="right-panel" id="detail">
-        <div class="detail-title">
-          <div>
-            <h2>AI Product Builder Internship</h2>
-            <p class="subtle">Best match because your stack and hackathon goal align.</p>
-          </div>
-          <span class="badge">Urgent</span>
-        </div>
-        <div class="insight">
-          Fit score 91: strong match on React, Node.js, OpenAI APIs, MVP building, and student-product experience.
-        </div>
-        <h2>Next best actions</h2>
-        <div class="task-list">
-          <div class="task"><span class="check">✓</span><span>Add one measurable AI project result to your resume.</span></div>
-          <div class="task"><span class="check">✓</span><span>Prepare a 45-second story about CareerRadar AI.</span></div>
-          <div class="task"><span class="check">✓</span><span>Apply today and send a founder-style LinkedIn note.</span></div>
-        </div>
-        <h2>Outreach draft</h2>
-        <div class="outreach">
-          Hi, I am building CareerRadar AI during the OpenAI hackathon: a student opportunity copilot using React, Node.js, MongoDB, and OpenAI APIs. I would love to contribute to your AI product internship and can share my MVP demo this week.
-        </div>
-      </section>
-    </aside>
-  </div>
-
-  <script src="clerk-config.js"></script>
-  <script>
-    const details = [
-      {
-        title: "AI Product Builder Internship",
-        subtitle: "Best match because your stack and hackathon goal align.",
-        badge: "Urgent",
-        insight: "Fit score 91: strong match on React, Node.js, OpenAI APIs, MVP building, and student-product experience.",
-        actions: [
-          "Add one measurable AI project result to your resume.",
-          "Prepare a 45-second story about CareerRadar AI.",
-          "Apply today and send a founder-style LinkedIn note."
-        ],
-        outreach: "Hi, I am building CareerRadar AI during the OpenAI hackathon: a student opportunity copilot using React, Node.js, MongoDB, and OpenAI APIs. I would love to contribute to your AI product internship and can share my MVP demo this week."
-      },
-      {
-        title: "Student AI Tools Hackathon",
-        subtitle: "Strong public-building match with launch potential.",
-        badge: "Tomorrow",
-        insight: "Fit score 88: your student-focused product idea, Codex usage, and MVP shell make this a high-probability launch opportunity.",
-        actions: [
-          "Record a 60-second MVP walkthrough.",
-          "Publish the build-in-public post with screenshots.",
-          "Submit the product brief and user flow before the deadline."
-        ],
-        outreach: "I am building CareerRadar AI for students who miss opportunities because information is scattered. Today I shipped the checkpoint MVP shell, user flow, pitch, and product brief. Feedback welcome."
-      },
-      {
-        title: "Campus Placement Prep Cohort",
-        subtitle: "Useful support track for interview readiness.",
-        badge: "Prep",
-        insight: "Fit score 76: strong enough to save, but lower priority than internship and hackathon opportunities because it is a learning program.",
-        actions: [
-          "Save for next week after hackathon launch.",
-          "Use the mock interview questions for CareerRadar demo prep.",
-          "Compare cohort curriculum against your missing skill list."
-        ],
-        outreach: "I am interested in the placement prep cohort and would like to join after launching my hackathon MVP. My focus areas are AI product building, DSA refresh, and interview storytelling."
-      }
-    ];
-
-    const cards = document.querySelectorAll(".opportunity");
-    const detail = document.getElementById("detail");
-
-    function renderDetail(index) {
-      const item = details[index];
-      detail.innerHTML = `
-        <div class="detail-title">
-          <div>
-            <h2>${item.title}</h2>
-            <p class="subtle">${item.subtitle}</p>
-          </div>
-          <span class="badge">${item.badge}</span>
-        </div>
-        <div class="insight">${item.insight}</div>
-        <h2>Next best actions</h2>
-        <div class="task-list">
-          ${item.actions.map(action => `<div class="task"><span class="check">✓</span><span>${action}</span></div>`).join("")}
-        </div>
-        <h2>Outreach draft</h2>
-        <div class="outreach">${item.outreach}</div>
-      `;
-    }
-
-    cards.forEach(card => {
-      card.addEventListener("click", () => {
-        cards.forEach(item => item.classList.remove("selected"));
-        card.classList.add("selected");
-        renderDetail(Number(card.dataset.index));
-      });
-    });
-
-    const navButtons = document.querySelectorAll("[data-view-target]");
-    const views = document.querySelectorAll(".view");
-
-    navButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const target = button.dataset.viewTarget;
-        navButtons.forEach(item => item.classList.remove("active"));
-        button.classList.add("active");
-        views.forEach(view => view.classList.toggle("active", view.id === `view-${target}`));
-      });
-    });
-
-    const importResumeButton = document.getElementById("import-resume-button");
-    const refreshRadarButton = document.getElementById("refresh-radar-button");
-    const generateFitButton = document.getElementById("generate-fit-button");
-    const sampleResumeButton = document.getElementById("sample-resume-button");
-    const downloadReportButton = document.getElementById("download-report-button");
-    const resumeFileInput = document.getElementById("resume-file");
-    const resumeTextarea = document.getElementById("resume");
-    const skillsInput = document.getElementById("skills");
-    const uploadStatus = document.getElementById("resume-upload-status");
-    const resumeStrengthCard = document.getElementById("resume-strength-card");
-    const resumeGapCard = document.getElementById("resume-gap-card");
-    let latestResumeAnalysis = null;
-
-    const skillSignals = [
-      "React", "Node.js", "MongoDB", "OpenAI APIs", "JavaScript", "TypeScript",
-      "Python", "Express", "API", "AI automation", "resume", "hackathon",
-      "full-stack", "frontend", "backend", "deployment", "GitHub", "Figma",
-      "analytics", "interview", "outreach", "recommendation"
-    ];
-
-    const opportunityRequirements = ["React", "Node.js", "MongoDB", "OpenAI APIs", "full-stack", "AI automation", "deployment", "analytics", "recommendation"];
-
-    function setUploadStatus(title, message) {
-      uploadStatus.innerHTML = `<strong>${title}</strong><span>${message}</span>`;
-    }
-
-    function loadScriptOnce(src, globalName) {
-      return new Promise((resolve, reject) => {
-        if (globalName && window[globalName]) {
-          resolve(window[globalName]);
-          return;
-        }
-        const existing = document.querySelector(`script[src="${src}"]`);
-        if (existing) {
-          existing.addEventListener("load", () => resolve(globalName ? window[globalName] : true), { once: true });
-          existing.addEventListener("error", reject, { once: true });
-          return;
-        }
-        const script = document.createElement("script");
-        script.src = src;
-        script.async = true;
-        script.addEventListener("load", () => resolve(globalName ? window[globalName] : true));
-        script.addEventListener("error", reject);
-        document.body.appendChild(script);
-      });
-    }
-
-    async function extractPdfText(file) {
-      await loadScriptOnce("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js", "pdfjsLib");
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-      const data = await file.arrayBuffer();
-      const pdf = await window.pdfjsLib.getDocument({ data }).promise;
-      const pages = [];
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-        const page = await pdf.getPage(pageNumber);
-        const content = await page.getTextContent();
-        pages.push(content.items.map(item => item.str).join(" "));
-      }
-      return pages.join("\n");
-    }
-
-    async function extractDocxText(file) {
-      await loadScriptOnce("https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js", "mammoth");
-      const result = await window.mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
-      return result.value;
-    }
-
-    async function extractResumeText(file) {
-      const name = file.name.toLowerCase();
-      if (name.endsWith(".pdf") || file.type === "application/pdf") return extractPdfText(file);
-      if (name.endsWith(".docx")) return extractDocxText(file);
-      return file.text();
-    }
-
-    function analyzeResume(text) {
-      const normalized = text.toLowerCase();
-      const found = skillSignals.filter(skill => normalized.includes(skill.toLowerCase()));
-      const foundSet = new Set(found.map(skill => skill.toLowerCase()));
-      const matchedRequirements = opportunityRequirements.filter(skill => foundSet.has(skill.toLowerCase()));
-      const missing = opportunityRequirements.filter(skill => !foundSet.has(skill.toLowerCase()));
-      const fitScore = Math.min(96, Math.max(52, Math.round((matchedRequirements.length / opportunityRequirements.length) * 70 + 24)));
-      const summary = text.replace(/\s+/g, " ").trim().slice(0, 420);
-      return {
-        found,
-        missing,
-        fitScore,
-        summary: summary || "Resume uploaded, but no readable text was found.",
-        wordCount: text.trim() ? text.trim().split(/\s+/).length : 0
-      };
-    }
-
-    function updateResumeAnalysis(analysis, fileName = "resume") {
-      latestResumeAnalysis = { ...analysis, fileName, updatedAt: new Date().toLocaleString() };
-      resumeTextarea.value = analysis.summary;
-      if (analysis.found.length) {
-        skillsInput.value = analysis.found.slice(0, 8).join(", ");
-      }
-      resumeStrengthCard.innerHTML = `
-        <h3>Strong signals</h3>
-        <p>${analysis.found.length ? analysis.found.slice(0, 8).join(", ") : "Add more project and skill details for stronger matching."}</p>
-        <div class="fit-meter"><span style="width:${analysis.fitScore}%"></span></div>
-      `;
-      resumeGapCard.innerHTML = `
-        <h3>Missing proof</h3>
-        <p>${analysis.missing.length ? `Add evidence for: ${analysis.missing.slice(0, 6).join(", ")}.` : "Great coverage. Add metrics and links to make the proof stronger."}</p>
-        <div class="fit-meter"><span style="width:${Math.max(18, 100 - analysis.found.length * 7)}%"></span></div>
-      `;
-      details[0].insight = `Resume fit ${analysis.fitScore}: ${analysis.found.slice(0, 5).join(", ") || "profile signals"} match the AI product internship.`;
-      details[0].actions = [
-        analysis.missing.length ? `Add one proof point for ${analysis.missing[0]}.` : "Add one measurable result from your strongest project.",
-        "Include a live demo, GitHub link, or screenshot in your application.",
-        "Apply today with the generated founder-style outreach note."
-      ];
-      renderDetail(0);
-      setUploadStatus("Resume analyzed", `${fileName} scored ${analysis.fitScore}% fit. Review Resume Fit for gaps and next actions.`);
-    }
-
-    async function handleResumeFile(file) {
-      if (!file) return;
-      setUploadStatus("Analyzing resume", `${file.name} is being read locally in your browser.`);
-      try {
-        const text = await extractResumeText(file);
-        updateResumeAnalysis(analyzeResume(text), file.name);
-        navButtons.forEach(item => item.classList.remove("active"));
-        document.querySelector('[data-view-target="resume"]').classList.add("active");
-        views.forEach(view => view.classList.toggle("active", view.id === "view-resume"));
-      } catch (error) {
-        setUploadStatus("Upload needs text", "This file could not be read here. Paste the resume text into Resume summary and click Generate fit radar.");
-      }
-    }
-
-    importResumeButton.addEventListener("click", () => resumeFileInput.click());
-    resumeFileInput.addEventListener("change", event => handleResumeFile(event.target.files[0]));
-    generateFitButton.addEventListener("click", () => updateResumeAnalysis(analyzeResume(resumeTextarea.value), "pasted resume"));
-    refreshRadarButton.addEventListener("click", () => updateResumeAnalysis(analyzeResume(resumeTextarea.value), "current profile"));
-    sampleResumeButton.addEventListener("click", () => {
-      const sampleResume = [
-        "Ganesh Krishna Reddy",
-        "Full-stack AI builder with React, Node.js, MongoDB, OpenAI APIs, JavaScript, and deployment experience.",
-        "Built CareerRadar AI, a recommendation product for internships, hackathons, outreach, and interview preparation.",
-        "Created GitHub projects, analytics dashboards, resume tooling, and AI automation workflows for students."
-      ].join(" ");
-      updateResumeAnalysis(analyzeResume(sampleResume), "sample resume");
-      navButtons.forEach(item => item.classList.remove("active"));
-      document.querySelector('[data-view-target="resume"]').classList.add("active");
-      views.forEach(view => view.classList.toggle("active", view.id === "view-resume"));
-    });
-
-    downloadReportButton.addEventListener("click", () => {
-      const analysis = latestResumeAnalysis || analyzeResume(resumeTextarea.value);
-      const report = [
-        "CareerRadar AI - Resume Fit Report",
-        `Generated: ${new Date().toLocaleString()}`,
-        `Fit score: ${analysis.fitScore}%`,
-        `Detected skills: ${(analysis.found || []).join(", ") || "None detected"}`,
-        `Missing proof: ${(analysis.missing || []).join(", ") || "No major gaps"}`,
-        "",
-        "Resume summary:",
-        resumeTextarea.value,
-        "",
-        "Recommended next actions:",
-        "- Add measurable outcomes to your strongest project.",
-        "- Include a GitHub, demo, or screenshot proof link.",
-        "- Use the outreach draft to apply today."
-      ].join("\n");
-      const blob = new Blob([report], { type: "text/plain" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "careerradar-resume-fit-report.txt";
-      link.click();
-      URL.revokeObjectURL(url);
-    });
-
-    uploadStatus.addEventListener("dragover", event => {
-      event.preventDefault();
-      uploadStatus.classList.add("dragging");
-    });
-    uploadStatus.addEventListener("dragleave", () => uploadStatus.classList.remove("dragging"));
-    uploadStatus.addEventListener("drop", event => {
-      event.preventDefault();
-      uploadStatus.classList.remove("dragging");
-      handleResumeFile(event.dataTransfer.files[0]);
-    });
-
-    const authStatus = document.getElementById("auth-status");
-    const signedOutActions = document.getElementById("signed-out-actions");
-    const signedInActions = document.getElementById("signed-in-actions");
-    const signInButton = document.getElementById("sign-in-button");
-    const signUpButton = document.getElementById("sign-up-button");
-    const userButton = document.getElementById("user-button");
-
-    function updateAuthUi(isSignedIn) {
-      signedOutActions.hidden = isSignedIn;
-      signedInActions.hidden = !isSignedIn;
-      authStatus.textContent = isSignedIn
-        ? "Signed in. Your CareerRadar workspace is ready."
-        : "Sign in to save your radar, shortlist, and outreach drafts.";
-    }
-
-    function showClerkSetupMessage() {
-      authStatus.textContent = "Add your Clerk publishable key in clerk-config.js to enable auth.";
-      signInButton.addEventListener("click", () => alert("Create clerk-config.js from clerk-config.example.js and add your Clerk publishable key."));
-      signUpButton.addEventListener("click", () => alert("Create clerk-config.js from clerk-config.example.js and add your Clerk publishable key."));
-    }
-
-    async function loadClerk() {
-      const publishableKey = window.CLERK_PUBLISHABLE_KEY;
-      if (!publishableKey || publishableKey.includes("replace_me")) {
-        showClerkSetupMessage();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.async = true;
-      script.crossOrigin = "anonymous";
-      script.setAttribute("data-clerk-publishable-key", publishableKey);
-      script.src = "https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js";
-      document.body.appendChild(script);
-
-      script.addEventListener("load", async () => {
-        await window.Clerk.load();
-        updateAuthUi(Boolean(window.Clerk.user));
-        if (window.Clerk.user) {
-          window.Clerk.mountUserButton(userButton);
-        }
-        signInButton.addEventListener("click", () => window.Clerk.openSignIn());
-        signUpButton.addEventListener("click", () => window.Clerk.openSignUp());
-        window.Clerk.addListener(({ user }) => {
-          updateAuthUi(Boolean(user));
-          if (user) window.Clerk.mountUserButton(userButton);
-        });
-      });
-
-      script.addEventListener("error", () => {
-        authStatus.textContent = "Clerk could not load. Check your network and publishable key.";
-      });
-    }
-
-    loadClerk();
-  </script>
+  <footer>
+    <div><strong>CareerRadar AI</strong><br>AI-powered opportunity copilot for students</div>
+    <div>Product · Company · Legal · X · LinkedIn · GitHub<br>Built during OpenAI x Outskill Hackathon</div>
+  </footer>
 </body>
 </html>

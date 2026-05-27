@@ -4,7 +4,8 @@ CareerRadar AI is an AI-powered opportunity copilot for students. It helps them 
 
 ## Hackathon checkpoint package
 
-- `index.html` - clickable MVP shell for screenshots and demo.
+- `index.html` - public landing page for first-time users.
+- `radar.html` - clickable MVP app shell for screenshots and demo.
 - `docs/product-brief.md` - product journey, problem, users, MVP scope, metrics.
 - `docs/investor-pitch-one-pager.md` - one-page pitch for the checkpoint.
 - `docs/user-flow.md` - user flow diagram and workflow notes.
@@ -13,7 +14,7 @@ CareerRadar AI is an AI-powered opportunity copilot for students. It helps them 
 
 ## How to preview
 
-Open `index.html` in a browser. It is a static prototype, so no install step is required.
+Open `index.html` in a browser for the landing page, or `radar.html` for the app. It is a static prototype, so no install step is required.
 
 ## Clerk authentication setup
 
